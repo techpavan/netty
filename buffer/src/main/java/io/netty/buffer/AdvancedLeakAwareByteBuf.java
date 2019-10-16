@@ -937,6 +937,7 @@ final class AdvancedLeakAwareByteBuf extends SimpleLeakAwareByteBuf {
 
     @Override
     public boolean release() {
+        logger.warn("#### - AdvancedLeakAwareByteBuf - Recording leak: {}, {}, {}", leak, this.buf.getClass(), System.identityHashCode(this.buf));
         leak.record();
         return super.release();
     }

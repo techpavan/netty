@@ -17,6 +17,8 @@ package io.netty.handler.codec.http;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.util.internal.StringUtil;
+import io.netty.util.internal.logging.InternalLogger;
+import io.netty.util.internal.logging.InternalLoggerFactory;
 
 /**
  * The default {@link HttpContent} implementation.
@@ -24,6 +26,8 @@ import io.netty.util.internal.StringUtil;
 public class DefaultHttpContent extends DefaultHttpObject implements HttpContent {
 
     private final ByteBuf content;
+
+    private static final InternalLogger logger = InternalLoggerFactory.getInstance(DefaultHttpContent.class);
 
     /**
      * Creates a new instance with the specified chunk content.
@@ -91,6 +95,7 @@ public class DefaultHttpContent extends DefaultHttpObject implements HttpContent
 
     @Override
     public boolean release() {
+        logger.warn("#### - Release called in DefaultHttpContent with content: {}, {}", content.getClass(), content);
         return content.release();
     }
 
@@ -102,6 +107,6 @@ public class DefaultHttpContent extends DefaultHttpObject implements HttpContent
     @Override
     public String toString() {
         return StringUtil.simpleClassName(this) +
-               "(data: " + content() + ", decoderResult: " + decoderResult() + ')';
+                "(data: " + content() + ", decoderResult: " + decoderResult() + ')';
     }
 }

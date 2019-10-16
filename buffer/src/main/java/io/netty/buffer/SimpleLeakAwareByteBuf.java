@@ -19,6 +19,8 @@ package io.netty.buffer;
 import io.netty.util.ResourceLeakDetector;
 import io.netty.util.ResourceLeakTracker;
 import io.netty.util.internal.ObjectUtil;
+import io.netty.util.internal.logging.InternalLogger;
+import io.netty.util.internal.logging.InternalLoggerFactory;
 
 import java.nio.ByteOrder;
 
@@ -31,6 +33,7 @@ class SimpleLeakAwareByteBuf extends WrappedByteBuf {
      */
     private final ByteBuf trackedByteBuf;
     final ResourceLeakTracker<ByteBuf> leak;
+    private static final InternalLogger logger = InternalLoggerFactory.getInstance(SimpleLeakAwareByteBuf.class);
 
     SimpleLeakAwareByteBuf(ByteBuf wrapped, ByteBuf trackedByteBuf, ResourceLeakTracker<ByteBuf> leak) {
         super(wrapped);
@@ -99,10 +102,13 @@ class SimpleLeakAwareByteBuf extends WrappedByteBuf {
 
     @Override
     public boolean release() {
+        logger.warn("#### - SimpleLeakAwareByteBuf - Releasing: {}, {}, {}", leak, this.buf.getClass(), System.identityHashCode(this.buf));
         if (super.release()) {
+            logger.warn("#### - SimpleLeakAwareByteBuf - Releasing successful, closing leak: {}, {}, {}", leak, this.buf.getClass(), System.identityHashCode(this.buf));
             closeLeak();
             return true;
         }
+        logger.warn("#### - SimpleLeakAwareByteBuf - Releasing failed, closing leak: {}, {}, {}", leak, this.buf.getClass(), System.identityHashCode(this.buf));
         return false;
     }
 
@@ -119,6 +125,8 @@ class SimpleLeakAwareByteBuf extends WrappedByteBuf {
         // Close the ResourceLeakTracker with the tracked ByteBuf as argument. This must be the same that was used when
         // calling DefaultResourceLeak.track(...).
         boolean closed = leak.close(trackedByteBuf);
+        logger.warn("#### - SimpleLeakAwareByteBuf - Closing leak status: {}; {}, {}", closed, trackedByteBuf.getClass(), System.identityHashCode(trackedByteBuf));
+        logger.warn("#### - SimpleLeakAwareByteBuf - Leak object details: {}; {}, {}", leak.getClass(), System.identityHashCode(leak), leak);
         assert closed;
     }
 
