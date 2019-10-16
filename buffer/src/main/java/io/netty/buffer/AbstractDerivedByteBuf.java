@@ -16,6 +16,9 @@
 
 package io.netty.buffer;
 
+import io.netty.util.internal.logging.InternalLogger;
+import io.netty.util.internal.logging.InternalLoggerFactory;
+
 import java.nio.ByteBuffer;
 
 /**
@@ -26,6 +29,8 @@ import java.nio.ByteBuffer;
  */
 @Deprecated
 public abstract class AbstractDerivedByteBuf extends AbstractByteBuf {
+
+    private static final InternalLogger logger = InternalLoggerFactory.getInstance(AbstractDerivedByteBuf.class);
 
     protected AbstractDerivedByteBuf(int maxCapacity) {
         super(maxCapacity);
@@ -91,7 +96,10 @@ public abstract class AbstractDerivedByteBuf extends AbstractByteBuf {
     }
 
     boolean release0() {
-        return unwrap().release();
+        ByteBuf unwrapped = unwrap();
+        boolean releaseResult = unwrapped.release();
+        logger.warn("#### - AbstractDerivedByteBuf - Unwrapped: {}, {}, {}", unwrapped, unwrapped.getClass(), System.identityHashCode(unwrapped));
+        return releaseResult;
     }
 
     @Override
